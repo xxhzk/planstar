@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>计划星球</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3478f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="计划星球">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{--green:#34c759;--red:#ff3b30;--gray:#b8b8bd;--blue:#007aff;--orange:#ff9500;
+  --purple:#af52de;--bg:#f2f2f7;--line:#e5e5ea;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;}
+body{background:#d8d8de;display:flex;justify-content:center;min-height:100vh;}
+.phone{width:390px;max-width:100%;background:var(--bg);min-height:100vh;position:relative;box-shadow:0 0 30px rgba(0,0,0,.18);}
+.statusbar{height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;background:#fff;}
+.nav{height:52px;display:flex;align-items:center;gap:4px;padding:0 12px;background:#fff;
+  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;}
+.nav h1{font-size:17px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.back{font-size:26px;color:var(--blue);cursor:pointer;padding:0 6px;line-height:1;}
+.addbtn{width:32px;height:32px;border-radius:16px;background:var(--blue);color:#fff;font-size:22px;
+  border:none;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.navlink{font-size:14px;color:var(--blue);cursor:pointer;padding:0 6px;flex-shrink:0;}
+.page{padding:13px;padding-bottom:86px;}
+/* tabbar */
+.tabbar{position:fixed;bottom:0;width:390px;max-width:100%;height:66px;background:rgba(255,255,255,.97);
+  backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;z-index:30;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:10.5px;color:var(--gray);cursor:pointer;gap:2px;}
+.tab.active{color:var(--blue);}
+.tab .ico{font-size:20px;line-height:1;}
+/* card */
+.card{background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:11px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+.card-title{font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.tip{font-size:11px;color:#a8a8ae;font-weight:400;}
+.kv{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;color:#666;}
+.kv b{color:#111;font-weight:500;}
+.dep{color:var(--purple);}
+/* plan row */
+.plan-head{display:flex;align-items:center;gap:10px;cursor:pointer;padding-bottom:6px;}
+.plan-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0;}
+.plan-head .meta{flex:1;min-width:0;}
+.plan-head .meta b{font-size:15.5px;}
+.plan-head .meta small{color:#a8a8ae;display:block;font-size:11.5px;margin-top:2px;}
+.chev{color:#c7c7cc;font-size:18px;flex-shrink:0;}
+.chev.small{font-size:15px;}
+/* task row */
+.task{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #f4f4f6;cursor:pointer;}
+.task:last-of-type{border-bottom:none;}
+.task .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.task .t-main{flex:1;min-width:0;}
+.task .t-name{font-size:13.5px;}
+.task .t-sub{font-size:11px;color:#a0a0a6;margin-top:2px;line-height:1.5;}
+.task.dim{opacity:.6;}
+.tag{font-size:9.5px;background:#f0f0f3;color:#7a7a80;border-radius:4px;padding:1px 5px;margin-left:4px;}
+.tag.early-tag{background:#e5f6fb;color:#0a8bb0;}
+.tag.makeup-tag{background:#fff3e0;color:#c66a00;}
+.info-i{font-size:10px;color:#b0b0c0;cursor:pointer;margin-left:3px;font-style:normal;
+  border:1px solid #d8d8de;border-radius:50%;width:13px;height:13px;display:inline-flex;
+  align-items:center;justify-content:center;vertical-align:1px;}
+.info-i:active{background:#eef3ff;color:var(--blue);}
+.ghost{width:100%;padding:9px;border:none;border-radius:10px;background:#f5f7ff;color:var(--blue);
+  font-size:12.5px;cursor:pointer;margin-top:9px;}
+.strike{text-decoration:line-through;color:#b0b0b6;}
+/* 勾选框 */
+.chk{width:21px;height:21px;border-radius:50%;border:1.8px solid #d4d4da;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;cursor:pointer;transition:.15s;}
+.chk.on{background:var(--green);border-color:var(--green);}
+.st-tag{font-size:10px;padding:2px 7px;border-radius:6px;border:0.5px solid transparent;flex-shrink:0;}
+/* 甘特图 */
+.gtip{font-size:10.5px;color:#a8a8ae;font-weight:400;}
+.gantt-nav{display:flex;align-items:center;justify-content:center;gap:18px;margin:8px 0 6px;}
+.gantt-nav b{font-size:13px;}
+.gnav{font-size:19px;color:var(--blue);cursor:pointer;padding:0 8px;}
+.g-legend{display:flex;gap:9px;font-size:10px;color:#8a8a90;flex-wrap:wrap;margin-bottom:7px;}
+.g-legend span{display:flex;align-items:center;gap:3px;}
+.g-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+.g-wrap{display:flex;overflow:hidden;border-radius:6px;}
+.g-labels{flex-shrink:0;width:76px;}
+.g-lh{height:18px;}
+.g-l{height:22px;font-size:9.5px;color:#666;line-height:22px;overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis;padding-right:6px;}
+.g-scroll{flex:1;overflow:hidden;padding-bottom:2px;}
+.g-days{display:flex;height:18px;}
+.g-d{flex:1 1 0;min-width:0;font-size:7.5px;color:#a8a8ae;text-align:center;line-height:18px;overflow:hidden;}
+.g-row2{display:flex;height:22px;align-items:center;}
+.g-cell{flex:1 1 0;min-width:0;height:15px;border-radius:2px;box-sizing:border-box;
+  margin:0;border-right:1px solid #fff;}
+.g-cell.blank{background:#fafafc!important;border-right-color:#f4f4f8;}
+.g-summary{margin-top:10px;border-top:1px solid #f0f0f3;padding-top:8px;}
+.gs-row{display:flex;font-size:10.5px;color:#8a8a90;padding:3px 0;gap:6px;}
+.gs-row b{color:#444;font-weight:500;flex-shrink:0;}
+.gs-right{margin-left:auto;color:#6a6a70;flex-shrink:0;}
+/* 日历 */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.cal-head b{font-size:15px;}
+.cal-nav{font-size:19px;color:var(--blue);cursor:pointer;padding:0 10px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-grid.head div{text-align:center;font-size:10px;color:#a8a8ae;padding-bottom:3px;}
+.cal-cell{aspect-ratio:1;background:#fafafa;border-radius:8px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;cursor:pointer;position:relative;padding-top:2px;}
+.cal-cell.today{box-shadow:inset 0 0 0 1.6px var(--blue);}
+.cal-cell.sel{background:var(--blue);}
+.cal-cell.sel .cd{color:#fff;font-weight:700;}
+.cd{font-size:13px;}
+.cal-dots{display:flex;gap:1.5px;margin-top:2px;height:5px;align-items:center;}
+.cal-dots i{width:4px;height:4px;border-radius:50%;}
+.cmore{font-size:7px;color:#a8a8ae;}
+/* report */
+.score{display:flex;align-items:center;gap:15px;}
+.score-num{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;}
+.score-num b{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:19px;}
+.score-info{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:#8a8a90;}
+.score-info b{font-size:14.5px;color:#111;}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:11.5px;margin:7px 0;}
+.bar-row .lbl{width:78px;color:#666;flex-shrink:0;}
+.bar-row .track{flex:1;height:7px;background:#eee;border-radius:4px;overflow:hidden;}
+.bar-row .fill{height:100%;border-radius:4px;}
+.bar-row .val{width:32px;text-align:right;font-weight:600;flex-shrink:0;}
+.prow{display:flex;align-items:center;gap:7px;padding:10px 0;border-bottom:1px solid #f6f6f8;cursor:pointer;}
+.arrow{color:#c0c0c6;font-size:14px;transition:transform .18s;display:inline-block;}
+.arrow.down{transform:rotate(90deg);}
+.pname{font-size:13.5px;font-weight:500;}
+.pstats{margin-left:auto;font-size:13px;font-weight:600;}
+.pmini{font-size:11px;color:#a8a8ae;width:44px;text-align:right;}
+.pexpand{background:#fafbfd;border-radius:9px;padding:9px;margin:4px 0 8px;}
+.psub{display:flex;gap:9px;font-size:10.5px;color:#7a7a80;flex-wrap:wrap;margin-bottom:6px;}
+.rtable{width:100%;font-size:11px;border-collapse:collapse;}
+.rtable th{color:#a0a0a6;font-weight:400;text-align:right;padding:5px 3px;border-bottom:1px solid #eee;white-space:nowrap;}
+.rtable td{text-align:right;padding:6px 3px;border-bottom:1px solid #f5f5f8;}
+.rtable th:first-child,.rtable td:first-child{text-align:left;}
+.rtable tr.zero td{color:#c0c0c6;}
+.rtable td.red{color:var(--red);font-weight:600;}
+.rtable tr.tempr td{color:var(--purple);}
+.norec{font-size:9px;color:#c0c0c6;margin-left:4px;background:#f4f4f6;padding:1px 4px;border-radius:3px;}
+.advice{font-size:12px;color:#555;line-height:1.85;margin-top:7px;}
+/* modal */
+.mask{position:absolute;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;z-index:60;justify-content:center;}
+.mask.center{align-items:center;padding:24px;}
+.sheet{background:#fff;width:100%;border-radius:18px 18px 0 0;padding:18px 15px 26px;max-height:86%;overflow:auto;}
+.mask.center .sheet{border-radius:16px;max-height:80%;}
+.sheet h3{font-size:16.5px;margin-bottom:13px;text-align:center;}
+.sheet-desc{text-align:center;color:#9a9aa0;font-size:12px;line-height:1.7;margin-bottom:13px;}
+.field{margin-bottom:11px;}
+.field label{font-size:11.5px;color:#8a8a90;display:block;margin-bottom:5px;}
+.field input,.field select{width:100%;padding:9px;border:1px solid #e2e2e7;border-radius:9px;
+  font-size:14.5px;background:#fafafc;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue);background:#fff;}
+.field input.err{border-color:var(--red);background:#fff6f5;}
+.err-msg{color:var(--red);font-size:11px;margin-top:4px;display:none;}
+.err-msg.show{display:block;}
+.inline2{display:flex;gap:7px;}
+.inline2>*{flex:1;min-width:0;}
+.icon-pick{display:flex;gap:6px;flex-wrap:wrap;}
+.icon-pick span{width:36px;height:36px;border-radius:9px;background:#f2f2f7;display:flex;
+  align-items:center;justify-content:center;font-size:18px;cursor:pointer;border:2px solid transparent;}
+.icon-pick span.on{border-color:var(--blue);background:#eaf3ff;}
+.md-pick{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.md-pick span{text-align:center;padding:7px 0;border-radius:7px;background:#f2f2f7;
+  font-size:12px;cursor:pointer;color:#666;user-select:none;}
+.md-pick span.on{background:var(--blue);color:#fff;font-weight:600;}
+.wd-pick{display:flex;gap:4px;}
+.wd-pick span{flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#f2f2f7;
+  font-size:12px;cursor:pointer;color:#666;min-width:0;user-select:none;}
+.wd-pick span.on{background:var(--blue);color:#fff;font-weight:600;}
+.quick{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.quick button{font-size:11.5px;padding:5px 9px;border-radius:13px;border:1px solid #dcdce1;
+  background:#fff;cursor:pointer;color:#444;}
+.quick button.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+.quick .primary-sm{background:var(--blue);color:#fff;border-color:var(--blue);}
+.primary{width:100%;padding:12px;border:none;border-radius:11px;background:var(--blue);
+  color:#fff;font-size:15px;cursor:pointer;margin-top:5px;}
+.primary.green{background:var(--green);}
+.danger-bg{background:var(--red);}
+.secondary{width:100%;padding:12px;border:none;border-radius:11px;background:#f0f0f3;
+  color:#333;font-size:14px;cursor:pointer;margin-top:7px;}
+.danger{width:100%;padding:12px;border-radius:11px;background:#fff;color:var(--red);
+  font-size:14px;cursor:pointer;margin-top:7px;border:1px solid #ffd9d6;}
+.remark{font-size:11px;color:#9a9aa0;line-height:1.65;margin-top:7px;}
+.hintbox{background:#f7f9ff;border:1px solid #dfe8ff;border-radius:10px;padding:9px 11px;
+  font-size:11.5px;color:#4a6ea8;line-height:1.65;margin-bottom:11px;}
+.chkrow{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;color:#333;cursor:pointer;line-height:1.45;}
+.chkrow input{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--blue);}
+.chkrow small{color:#9a9aa0;font-size:10.5px;}
+.empty{text-align:center;color:var(--gray);font-size:12.5px;padding:22px 0;}
+
+/* 我的页面 */
+.me-head{display:flex;align-items:center;gap:12px;}
+.avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#eaf3ff,#f3eaff);
+  display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.me-info{display:flex;flex-direction:column;gap:3px;}
+.me-info b{font-size:16px;}
+.me-info span{font-size:11.5px;color:#8a8a90;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px;}
+.stat{background:#f8f9fc;border-radius:10px;padding:10px 4px;text-align:center;}
+.stat b{font-size:17px;display:block;color:#1f9d46;}
+.stat b.orange{color:var(--orange);}
+.stat b.cyan{color:#30b0c7;}
+.stat b.purple{color:var(--purple);}
+.stat span{font-size:9.5px;color:#8a8a90;}
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px;}
+.badge{background:#f4f4f7;border-radius:11px;padding:10px 4px;text-align:center;cursor:pointer;
+  opacity:.72;}
+.badge:not(.on) .b-ico{filter:grayscale(.35);opacity:.62;}
+.badge:not(.on) .b-name{color:#8d8d95;}
+.badge:not(.on) .b-desc{color:#a8a8b0;}
+.badge.on{filter:none;opacity:1;background:#fffaf0;box-shadow:inset 0 0 0 1px #ffe3a3;}
+.b-ico{font-size:24px;}
+.b-name{font-size:10.5px;font-weight:600;margin-top:3px;color:#444;}
+.b-bar{height:4px;background:#e8e8ee;border-radius:2px;margin:5px 6px 3px;overflow:hidden;}
+.b-bar i{display:block;height:100%;background:var(--orange);border-radius:2px;}
+.badge.on .b-bar i{background:var(--green);}
+.b-desc{font-size:8.5px;color:#a0a0a6;}
+.year-nav{display:flex;align-items:center;justify-content:center;gap:18px;margin:8px 0 10px;}
+.year-nav b{font-size:14px;}
+/* 年度总览:4行×3列月历格 */
+.ygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.ycell{background:#f6f7fa;border-radius:11px;padding:7px 8px 7px;min-height:60px;
+  border:1px solid transparent;display:flex;flex-direction:column;}
+.ycell.cur{border-color:#bcd9ff;background:#f3f8ff;}
+.ycell.empty.cur{border-style:solid;border-color:#bcd9ff;background:#f3f8ff;}
+.ycell.has{cursor:pointer;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06);
+  transition:transform .12s;min-height:60px;}
+.ycell.has:active{transform:scale(.97);}
+.yc-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px;}
+.yc-m{font-size:12px;font-weight:700;color:#333;}
+.ycell.has .yc-m{color:#1c1c1e;}
+.yc-n{font-size:9px;color:#1f9d46;font-weight:600;}
+.yc-item{font-size:10px;color:#555;line-height:1.7;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;}
+.yc-item .em{font-size:10.5px;margin-right:2px;}
+.yc-more{font-size:9.5px;color:var(--blue);margin-top:2px;font-weight:500;}
+/* 空月份:印章水印 + 右上角快捷加号 */
+.ycell.empty{position:relative;align-items:center;justify-content:center;background:#fafbfd;
+  border:1px dashed #e4e5ec;cursor:pointer;}
+.ycell.empty:active{background:#f2f6ff;border-color:#bcd9ff;}
+/* 印章水印:双圈红章 + 内字,轻微旋转,像真实盖章 */
+.yc-seal{width:42px;height:42px;border-radius:50%;border:1.5px solid rgba(214,96,96,.38);
+  display:flex;align-items:center;justify-content:center;transform:rotate(-15deg);
+  color:rgba(206,78,78,.55);font-size:14px;font-weight:700;letter-spacing:.5px;
+  margin:2px auto 0;box-shadow:inset 0 0 0 2.5px #fafbfd,inset 0 0 0 3.5px rgba(214,96,96,.28);}
+.yc-add{position:absolute;right:5px;top:5px;width:20px;height:20px;border-radius:50%;
+  background:var(--blue);color:#fff;font-size:14px;line-height:19px;text-align:center;
+  cursor:pointer;box-shadow:0 1px 4px rgba(0,122,255,.4);font-weight:400;}
+.yc-add:active{transform:scale(.9);}
+.ygrid{align-items:start;}
+.ycell.has .yc-body{margin:auto 0;}
+/* 月度弹窗明细 */
+.md-list{max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.md-row{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:8px 2px;
+  border-bottom:1px solid #f2f2f5;text-align:left;}
+.md-row:last-of-type{border-bottom:none;}
+.md-name{flex:1;min-width:0;}
+.md-hits{font-size:10.5px;color:#8a8a90;text-align:right;flex-shrink:0;line-height:1.5;}
+.md-hits small{color:#b0b0b8;}
+/* 勋章补充 */
+.b-tag{position:absolute;top:0;left:0;font-size:7.5px;color:#fff;background:#f0a020;
+  border-radius:11px 0 8px 0;padding:1px 5px 1.5px;line-height:1.4;font-weight:600;letter-spacing:.3px;}
+.badge{position:relative;}
+.badge-more{grid-column:1/-1;border:1.5px dashed #d3d3db;background:#fafafc;border-radius:11px;
+  padding:9px;text-align:center;cursor:pointer;font-size:11.5px;color:#7a7a85;font-weight:500;}
+.badge-more:active{background:#f0f1f6;}
+.badge-more small{color:#a8a8b0;font-weight:400;}
+.toast{position:absolute;top:62px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.86);
+  color:#fff;font-size:12px;padding:8px 14px;border-radius:17px;z-index:99;max-width:88%;
+  text-align:center;line-height:1.5;display:none;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar">9:41</div>
+  <div id="app"></div>
+  <div class="tabbar" id="tabbar">
+    <div class="tab active" data-t="plans"><span class="ico">📋</span>计划</div>
+    <div class="tab" data-t="cal"><span class="ico">📅</span>日历</div>
+    <div class="tab" data-t="report"><span class="ico">📊</span>报告</div>
+    <div class="tab" data-t="remind"><span class="ico">🔔</span>提醒</div>
+    <div class="tab" data-t="me"><span class="ico">👤</span>我的</div>
+  </div>
+  <div id="overlay"></div>
+  <div id="toast" class="toast"></div>
+</div>
+<script>
+/* 计划星球 · 数据层(纯逻辑,可独立测试) */
+/* 真实日期,真机使用 */
+const TODAY = (function(){const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
+
+const fmt = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const parse = ds => { const [y,m,d]=ds.split("-").map(Number); return new Date(y,m-1,d); };
+const addDays = (ds,n) => { const d=parse(ds); d.setDate(d.getDate()+n); return fmt(d); };
+const diffDays = (a,b) => Math.round((parse(b)-parse(a))/86400000);
+const dow = ds => parse(ds).getDay();
+const dom = ds => parse(ds).getDate();
+const md = ds => ds.slice(5).replace("-","/");
+
+let plans = [
+  {id:1,name:"学英语",icon:"📚",color:"#007aff",start:"2025-10-01",end:"2026-01-31",depPlan:"",tasks:[
+    {id:11,name:"背单词",icon:"🔤",start:"2025-10-01",end:"2026-01-31",rType:"loop",freq:"everyday",freqX:"",weekday:"",monthday:"",time:"08:00",dep:""},
+    {id:12,name:"听听力",icon:"🎧",start:"2025-10-01",end:"2026-01-31",rType:"loop",freq:"weekday",freqX:"",weekday:"",monthday:"",time:"21:00",dep:"11"},
+    {id:13,name:"看英文电影",icon:"🎬",start:"2025-11-01",end:"2025-12-31",rType:"loop",freq:"weekly",freqX:"",weekday:"6",monthday:"",time:"20:00",dep:""}
+  ]},
+  {id:2,name:"运动锻炼",icon:"🏃",color:"#34c759",start:"2025-10-01",end:"2025-12-31",depPlan:"",tasks:[
+    {id:21,name:"瑜伽",icon:"🧘",start:"2025-10-01",end:"2025-12-31",rType:"loop",freq:"every2week",freqX:"2",weekday:"",monthday:"",time:"19:00",dep:""}
+  ]}
+];
+
+let records = {
+  "2025-10-04":[{planId:1,taskId:11,status:"done",early:true},{planId:1,taskId:12,status:"done"}],
+  "2025-10-05":[{planId:1,taskId:11,status:"done",early:true},{planId:1,taskId:12,status:"skip"}],
+  "2025-10-06":[{planId:1,taskId:11,status:"done"},{planId:1,taskId:12,status:"done"},{planId:2,taskId:0,name:"跑步 40 分钟",status:"temp",temp:true}],
+  "2025-10-07":[{planId:1,taskId:11,status:"done"},{planId:1,taskId:12,status:"overdue"}],
+  "2025-10-08":[{planId:1,taskId:11,status:"done"},{planId:1,taskId:12,status:"overdue"},{planId:2,taskId:21,status:"done"}],
+  "2025-10-09":[{planId:1,taskId:11,status:"done"},{planId:1,taskId:12,status:"skip"},{planId:2,taskId:0,name:"跑步 30 分钟",status:"temp",temp:true}],
+  "2025-10-10":[{planId:1,taskId:11,status:"done",early:true}]
+};
+
+const STATUS = {
+  done:   {key:"done",   c:"#34c759", t:"已完成"},
+  skip:   {key:"skip",   c:"#b8b8bd", t:"已跳过"},
+  later:  {key:"later",  c:"#ff9500", t:"稍后提醒"},
+  overdue:{key:"overdue",c:"#ff3b30", t:"未完成"},
+  todo:   {key:"todo",   c:"#007aff", t:"待完成"},
+  future: {key:"future", c:"#c7c7cc", t:"未开始"}
+};
+
+/* 循环命中判定:weekday/monthday 为逗号分隔的多选,如 "1,3,5" / "1,15" */
+function hitOn(task, ds){
+  if(ds < task.start || ds > task.end) return false;
+  if(task.rType === "once") return ds === (task.onceDate || task.start);
+  switch(task.freq){
+    case "everyday": return true;
+    case "weekday":  { const w=dow(ds); return w>=1&&w<=5; }
+    case "weekend":  { const w=dow(ds); return w===0||w===6; }
+    case "weekly": {
+      const days=String(task.weekday||"").split(",").filter(x=>x!=="");
+      return days.includes(String(dow(ds)));
+    }
+    case "monthly": {
+      const days=String(task.monthday||"").split(",").filter(x=>x!=="").map(Number);
+      if(!days.length) return false;
+      const last=new Date(parse(ds).getFullYear(), parse(ds).getMonth()+1, 0).getDate();
+      const d=dom(ds);
+      /* 每个选中的"几号"在小月顺延到月末;同一只命中一次 */
+      return days.some(n=>d===Math.min(n,last));
+    }
+    case "everynday": {
+      const step=Math.max(1,Number(task.freqX)||1);
+      return diffDays(task.start,ds) % step === 0;
+    }
+    case "every2week": {
+      const step=Math.max(1,Number(task.freqX)||1)*7;
+      return diffDays(task.start,ds) % step === 0;
+    }
+    default: return false;
+  }
+}
+
+function getRec(planId,taskId,ds){
+  return (records[ds]||[]).find(r=>r.planId===planId && r.taskId===taskId);
+}
+
+function statusOf(planId,taskId,ds){
+  const r = getRec(planId,taskId,ds);
+  if(r){
+    if(r.status==="done"){
+      /* early=提前完成(未来日期勾选) makeup=补卡(过期日期补记) */
+      if(r.early)  return {...STATUS.done, early:true};
+      if(r.makeup) return {...STATUS.done, makeup:true};
+      return STATUS.done;
+    }
+    if(r.status==="skip")    return STATUS.skip;
+    if(r.status==="later")   return STATUS.later;
+    if(r.status==="overdue") return STATUS.overdue;
+    if(r.status==="temp")    return STATUS.done;
+  }
+  if(ds < TODAY)  return STATUS.overdue;
+  if(ds === TODAY)return STATUS.todo;
+  return STATUS.future;
+}
+
+/* 某天所有任务(实时推算未来) */
+function tasksOnDate(ds){
+  const out=[];
+  plans.forEach(p=>{
+    if(ds < p.start || ds > p.end) return;
+    p.tasks.forEach(t=>{
+      if(hitOn(t,ds)){
+        out.push({planId:p.id,taskId:t.id,name:t.name,icon:t.icon,color:p.color,
+                  time:t.time,plan:p,task:t,status:statusOf(p.id,t.id,ds)});
+      }
+    });
+  });
+  (records[ds]||[]).forEach(r=>{
+    if(r.temp){
+      const p=plans.find(x=>x.id===r.planId);
+      out.push({planId:r.planId,taskId:0,name:r.name,icon:"✏️",
+                color:p?p.color:"#8e8e93",time:"",plan:p,task:null,temp:true,status:STATUS.done});
+    }
+  });
+  return out.sort((a,b)=>(a.time||"99:99").localeCompare(b.time||"99:99"));
+}
+
+/* 写入记录 */
+function setRec(planId,taskId,ds,status,extra){
+  const list = records[ds] = records[ds] || [];
+  const i = list.findIndex(r=>r.planId===planId && r.taskId===taskId);
+  if(i>=0) list[i] = {...list[i],status,...(extra||{})};
+  else list.push({planId,taskId,status,...(extra||{})});
+}
+function toggleDone(planId,taskId,ds){
+  const r=getRec(planId,taskId,ds);
+  if(r && r.status==="done"){
+    const list=records[ds];
+    list.splice(list.findIndex(x=>x.planId===planId&&x.taskId===taskId),1);
+    return {done:false};
+  }
+  /* 提前完成:勾选尚未到期的日期;补卡:补记已过期未完成的日期 */
+  const early = ds > TODAY;
+  const makeup = ds < TODAY;
+  setRec(planId,taskId,ds,"done",{early,makeup});
+  return {done:true, early, makeup};
+}
+
+const pct=(n,d)=> d ? Math.round(n/d*100) : 0;
+
+/* 统计:逐日推算全部实例,含未来 */
+function collectStats(s,e){
+  const byPlan={}, byTask={}, daily={}, tempByPlan={};
+  const blank=()=>({done:0,early:0,skip:0,overdue:0,todo:0,total:0});
+  let ds=s;
+  while(ds<=e){
+    const list=tasksOnDate(ds);
+    daily[ds]={done:0,total:0};
+    list.forEach(x=>{
+      const pk=x.planId;
+      byPlan[pk]=byPlan[pk]||blank();
+      const tk=pk+"|"+(x.taskId||"temp");
+      byTask[tk]=byTask[tk]||{planId:pk,taskId:x.taskId,name:x.name,temp:!!x.temp,
+                             color:x.color,icon:x.icon,...blank()};
+      const P=byPlan[pk], T=byTask[tk], D=daily[ds];
+      D.total++;
+      P.total++; T.total++;
+      const k=x.status.key;
+      if(k==="done"){ P.done++;T.done++;D.done++; if(x.status.early){P.early++;T.early++;} }
+      else if(k==="skip"){ P.skip++;T.skip++; }
+      else if(k==="overdue"){ P.overdue++;T.overdue++; }
+      else { P.todo++;T.todo++; }
+      if(x.temp){ tempByPlan[pk]=(tempByPlan[pk]||0)+1; }
+    });
+    ds=addDays(ds,1);
+  }
+  return {byPlan,byTask,daily,tempByPlan};
+}
+
+</script>
+<script>
+/* 计划星球 · 视图层 */
+let view="plans", openPlanId=null, calSel=TODAY, curMonth=null;
+let reportRange={s:"2025-10-01",e:TODAY};
+let expanded={};           /* 报告里展开的计划 id */
+let ganttZoom="day";       /* day | week */
+
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function toast(m){
+  const t=$("#toast"); t.textContent=m; t.style.display="block";
+  clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",2200);
+}
+
+/* 频率文案 */
+const FREQ_TXT={everyday:"每天",weekday:"工作日每天",weekend:"周末每天",
+  weekly:"每周",monthly:"每月",everynday:"每隔",every2week:"每隔"};
+const WD=["周日","周一","周二","周三","周四","周五","周六"];
+function freqText(t){
+  if(t.rType==="once") return "只提醒一次";
+  switch(t.freq){
+    case "everyday": return "每天";
+    case "weekday":  return "工作日每天";
+    case "weekend":  return "周末每天";
+    case "weekly": {
+      const days=String(t.weekday||"").split(",").filter(x=>x!=="").map(Number).sort((a,b)=>a-b);
+      if(!days.length) return "每周 ?";
+      /* 单选用"每周六",多选用"每周一、三、五",避免"每周周六"这种重复 */
+      if(days.length===1) return "每"+WD[days[0]];
+      return "每周"+days.map(d=>WD[d].slice(1)).join("、");
+    }
+    case "monthly": {
+      const days=String(t.monthday||"").split(",").filter(x=>x!=="").map(Number).sort((a,b)=>a-b);
+      return "每月 "+(days.length?days.join("、"):"?")+" 号";
+    }
+    case "everynday":return "每隔 "+(t.freqX||"?")+" 天";
+    case "every2week":return "每隔 "+(t.freqX||"?")+" 周";
+    default: return "每天";
+  }
+}
+function remindText(t){
+  if(t.rType==="once") return "只提醒一次 · "+(t.onceDate||t.start)+" "+t.time;
+  return freqText(t)+" · "+t.time;
+}
+function depName(t,plan){
+  if(!t.dep) return "";
+  const d=plan.tasks.find(x=>String(x.id)===String(t.dep));
+  return d?d.name:"";
+}
+function hitCount(t){
+  let n=0,ds=t.start;
+  while(ds<=t.end){ if(hitOn(t,ds)) n++; ds=addDays(ds,1); }
+  return n;
+}
+
+/* ================= 渲染 ================= */
+function render(){
+  $$("#tabbar .tab").forEach(t=>t.classList.toggle("active",t.dataset.t===view));
+  let html="";
+  if(view==="plans")       html = openPlanId?planDetail():planList();
+  else if(view==="cal")    html = calendarPage();
+  else if(view==="report") html = reportPage();
+  else if(view==="me")     html = myPage();
+  else                     html = remindPage();
+  $("#app").innerHTML = html;
+}
+
+/* ================= 计划列表 ================= */
+function planList(){
+  let h=`<div class="nav"><h1>我的计划</h1><button class="addbtn" onclick="openPlanForm()">+</button></div><div class="page">`;
+  plans.forEach(p=>{
+    const activeN = p.tasks.filter(t=>hitOn(t,TODAY)).length;
+    h+=`<div class="card">
+      <div class="plan-head" onclick="openPlanId=${p.id};render()">
+        <div class="plan-ico" style="background:${p.color}1f">${p.icon}</div>
+        <div class="meta"><b>${esc(p.name)}</b>
+          <small>${p.start} ~ ${p.end} · ${p.tasks.length} 个任务</small>
+          <small style="color:${p.color}">今天有 ${activeN} 项要做</small></div>
+        <span class="chev">›</span>
+      </div>
+      ${p.tasks.map(t=>`<div class="task" onclick="event.stopPropagation();openTaskForm(${p.id},${t.id})">
+        <div class="dot" style="background:${p.color}"></div>
+        <div class="t-main"><div class="t-name">${t.icon} ${esc(t.name)}</div>
+          <div class="t-sub">🔔 ${remindText(t)}</div></div>
+        <span class="chev small">›</span></div>`).join("")}
+      <button class="ghost" onclick="openTaskForm(${p.id})">+ 添加任务</button>
+    </div>`;
+  });
+  return h+`</div>`;
+}
+
+/* ================= 计划详情(编辑入口 + 新版甘特图) ================= */
+function planDetail(){
+  const p=plans.find(x=>x.id===openPlanId);
+  let h=`<div class="nav">
+    <span class="back" onclick="openPlanId=null;render()">‹</span>
+    <h1>${p.icon} ${esc(p.name)}</h1>
+    <span class="navlink" onclick="openPlanForm(${p.id})">编辑</span>
+    <button class="addbtn" onclick="openTaskForm(${p.id})">+</button></div><div class="page">`;
+
+  h+=`<div class="card">
+    <div class="card-title">计划信息</div>
+    <div class="kv"><span>时间范围</span><b>${p.start} ~ ${p.end}</b></div>
+    <div class="kv"><span>总天数</span><b>${diffDays(p.start,p.end)+1} 天</b></div>
+    <div class="kv"><span>任务数</span><b>${p.tasks.length} 个</b></div>
+    ${p.depPlan?`<div class="kv"><span>计划依赖</span><b class="dep">↳ 依赖「${esc((plans.find(x=>x.id==p.depPlan)||{}).name||"")}」完成后开始</b></div>`:""}
+  </div>`;
+
+  /* ---------- 新版甘特图:日期格子热力图 ---------- */
+  h+=ganttHtml(p);
+
+  /* ---------- 任务列表 ---------- */
+  h+=`<div class="card"><div class="card-title">任务列表<span class="navlink" onclick="openTaskForm(${p.id})">+ 添加</span></div>`;
+  if(!p.tasks.length) h+=`<div class="empty">还没有任务</div>`;
+  p.tasks.forEach(t=>{
+    const dep=depName(t,p), n=hitCount(t);
+    h+=`<div class="task" onclick="openTaskForm(${p.id},${t.id})">
+      <div class="dot" style="background:${p.color}"></div>
+      <div class="t-main">
+        <div class="t-name">${t.icon} ${esc(t.name)}</div>
+        <div class="t-sub">🔔 ${remindText(t)} · 共 ${n} 次</div>
+        <div class="t-sub">📆 ${t.start} ~ ${t.end}${dep?" · ↳ "+esc(dep):""}</div>
+      </div><span class="chev small">›</span></div>`;
+  });
+  h+=`</div></div>`;
+  return h;
+}
+
+/* 甘特图:按月分块,每天一格,命中着色 */
+function ganttHtml(p){
+  /* 以月为单位分块显示,最多显示 4 个月,可翻页 */
+  const months=[];
+  let d=parse(p.start), end=parse(p.end);
+  while(d<=end && months.length<24){
+    months.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));
+    d=new Date(d.getFullYear(),d.getMonth()+1,1);
+  }
+  const cur=ganttMonth||months[0];
+
+  let h=`<div class="card">
+    <div class="card-title">进度甘特图
+      <span class="gtip">每格=1天,有色=当天要做</span></div>
+    <div class="gantt-nav">
+      <span class="gnav" onclick="shiftGantt(-1)">‹</span>
+      <b>${cur.replace("-"," 年 ")} 月</b>
+      <span class="gnav" onclick="shiftGantt(1)">›</span>
+    </div>`;
+
+  const [yy,mm]=cur.split("-").map(Number);
+  const lastDay=new Date(yy,mm,0).getDate();
+
+  h+=`<div class="g-legend">
+    <span><i style="background:#34c759"></i>已完成</span>
+    <span><i style="background:#ff3b30"></i>未完成</span>
+    <span><i style="background:#007aff"></i>待完成</span>
+    <span><i style="background:#e4e4ea"></i>未开始</span>
+  </div>`;
+
+  /* 表头日期 */
+  h+=`<div class="g-wrap"><div class="g-labels"><div class="g-lh"></div>`;
+  p.tasks.forEach(t=>{ h+=`<div class="g-l">${t.icon} ${esc(t.name)}</div>`; });
+  h+=`</div><div class="g-scroll"><div class="g-days">`;
+  for(let i=1;i<=lastDay;i++){
+    const showLabel = (i===1 || i%5===0);
+    h+=`<div class="g-d">${showLabel?i:""}</div>`;
+  }
+  h+=`</div>`;
+  p.tasks.forEach(t=>{
+    h+=`<div class="g-row2">`;
+    for(let i=1;i<=lastDay;i++){
+      const ds=`${yy}-${String(mm).padStart(2,"0")}-${String(i).padStart(2,"0")}`;
+      const inRange = ds>=t.start && ds<=t.end && ds>=p.start && ds<=p.end;
+      const hit = inRange && hitOn(t,ds);
+      let bg, cls="", title=ds;
+      if(hit){
+        const st=statusOf(p.id,t.id,ds);
+        bg=st.c; title=ds+" "+st.t;
+      }else if(inRange){
+        bg="#ececf2"; title=ds+" 无任务";
+      }else{
+        bg="#fbfbfd"; cls="blank"; title=ds+" 不在任务周期";
+      }
+      h+=`<div class="g-cell ${cls}" style="background:${bg}" title="${title}"></div>`;
+    }
+    h+=`</div>`;
+  });
+  h+=`</div></div>`;
+
+  /* 每个任务的频率摘要 */
+  h+=`<div class="g-summary">`;
+  p.tasks.forEach(t=>{
+    const n=hitCount(t);
+    const doneN=countDone(p.id,t.id);
+    h+=`<div class="gs-row"><b>${t.icon} ${esc(t.name)}</b>
+      <span>${remindText(t)}</span>
+      <span class="gs-right">共 ${n} 次 · 已完成 ${doneN}</span></div>`;
+  });
+  h+=`</div></div>`;
+  return h;
+}
+let ganttMonth=null;
+function shiftGantt(n){
+  const p=plans.find(x=>x.id===openPlanId);
+  const cur=ganttMonth||p.start.slice(0,7);
+  let [y,m]=cur.split("-").map(Number);
+  m+=n; if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+  ganttMonth=y+"-"+String(m).padStart(2,"0");
+  render();
+}
+function countDone(planId,taskId){
+  let n=0;
+  Object.keys(records).forEach(ds=>{
+    (records[ds]||[]).forEach(r=>{ if(r.planId===planId&&r.taskId===taskId&&r.status==="done") n++; });
+  });
+  return n;
+}
+
+/* ================= 日历(可预览未来 + 可勾选完成) ================= */
+function calendarPage(){
+  const base=curMonth||calSel.slice(0,7);
+  const [y,m]=base.split("-").map(Number);
+  const firstDay=new Date(y,m-1,1);
+  const days=new Date(y,m,0).getDate();
+  const lead=(firstDay.getDay()+6)%7;
+
+  let cells="";
+  for(let i=0;i<lead;i++) cells+=`<div></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const list=tasksOnDate(ds);
+    const dots=list.slice(0,4).map(x=>`<i style="background:${x.status.c}"></i>`).join("");
+    const more=list.length>4?`<span class="cmore">+${list.length-4}</span>`:"";
+    cells+=`<div class="cal-cell ${ds===TODAY?'today':''} ${ds===calSel?'sel':''}" onclick="calSel='${ds}';render()">
+      <span class="cd">${d}</span><div class="cal-dots">${dots}${more}</div></div>`;
+  }
+
+  let h=`<div class="nav"><h1>日历</h1></div><div class="page"><div class="card">
+    <div class="cal-head"><span class="cal-nav" onclick="shiftMonth(-1)">‹</span>
+      <b>${y} 年 ${m} 月</b>
+      <span class="cal-nav" onclick="shiftMonth(1)">›</span></div>
+    <div class="cal-grid head">${["一","二","三","四","五","六","日"].map(w=>`<div>${w}</div>`).join("")}</div>
+    <div class="cal-grid">${cells}</div>
+    <div class="remark">点日期查看当天任务;未来日期的任务已按循环规则预生成,可直接提前勾选完成</div>
+  </div>`;
+
+  /* 当天任务列表:可勾选 */
+  const list=tasksOnDate(calSel);
+  h+=`<div class="card"><div class="card-title">${calSel}${calSel===TODAY?" · 今天":""}
+    <span class="tip">${list.length} 项任务</span></div>`;
+  if(!list.length) h+=`<div class="empty">这一天没有任务</div>`;
+  list.forEach(x=>{
+    const isDone=x.status.key==="done";
+    /* 状态标签:已完成时附加 提前/补卡 标记 */
+    let tagTxt=x.status.t;
+    if(isDone&&x.status.early) tagTxt="已完成·提前";
+    else if(isDone&&x.status.makeup) tagTxt="已完成·补卡";
+    const tagHtml=(x.temp?'<span class="tag">临时</span>':'')
+      +(isDone&&x.status.early?'<span class="tag early-tag">提前</span>':'')
+      +(isDone&&x.status.makeup?'<span class="tag makeup-tag">补卡</span>':'');
+    h+=`<div class="task ${x.status.key==='overdue'?'dim':''}">
+      <div class="chk ${isDone?'on':''}" onclick="onToggle(${x.planId},${x.taskId},'${calSel}')">
+        ${isDone?'✓':''}</div>
+      <div class="t-main">
+        <div class="t-name ${isDone?'strike':''}">${x.icon} ${esc(x.name)}${tagHtml}</div>
+        <div class="t-sub">${x.plan?esc(x.plan.name):""}${x.time?" · "+x.time:""}</div>
+      </div>
+      <div class="st-tag" style="color:${x.status.c};border-color:${x.status.c}44;background:${x.status.c}12">${tagTxt}</div>
+    </div>`;
+  });
+  h+=`<button class="ghost" onclick="openTempForm()">+ 在这一天补记临时任务</button></div>`;
+  return h+`</div>`;
+}
+function onToggle(planId,taskId,ds){
+  if(!taskId) return toast("临时任务无需勾选");
+  const res=toggleDone(planId,taskId,ds);
+  if(!res.done){ toast("↩ 已取消完成"); render(); return; }
+  if(res.early){
+    /* 提前完成循环任务(间隔型)时,询问循环节奏 */
+    const p=plans.find(x=>x.id===planId);
+    const t=p&&p.tasks.find(x=>x.id===taskId);
+    const spaced=t&&(t.rType==="loop"&&(t.freq==="everynday"||t.freq==="every2week"||t.freq==="weekly"||t.freq==="monthly"));
+    render();
+    if(spaced) askLoopChoice(planId,taskId,t,ds);
+    else toast("✅ 已提前完成");
+    return;
+  }
+  if(res.makeup){ toast("✅ 已补卡完成(标记为补卡)"); render(); return; }
+  toast("✅ 已标记完成"); render();
+}
+/* 提前完成间隔型循环任务:选择后续循环节奏 */
+function askLoopChoice(planId,taskId,t,ds){
+  const step=t.freq==="every2week"?`${t.freqX||2} 周`:t.freq==="everynday"?`${t.freqX||1} 天`:"1 个周期";
+  const nextKeep=ds;  /* Demo 中简化展示 */
+  overlay(`<div class="mask center" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+    <h3>🎉 提前完成「${esc(t.name)}」</h3>
+    <p class="sheet-desc">该任务${freqText(t)}提醒一次,本次周期内已完成。<br>后续循环按哪种节奏继续?</p>
+    <button class="primary" onclick="closeOverlay();toast('📅 保持原计划节奏,下次按原表提醒')">📅 保持原计划节奏</button>
+    <button class="secondary" onclick="closeOverlay();toast('🔄 循环已重置:从今天(${ds})起算每隔 ${step}')">🔄 按实际完成时间重置循环</button>
+    <div class="remark">真实 App 中会把选择记为该任务的默认,后续不再重复询问</div>
+  </div></div>`);
+}
+function shiftMonth(n){
+  const base=curMonth||calSel.slice(0,7);
+  let [y,m]=base.split("-").map(Number);
+  m+=n; if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+  curMonth=y+"-"+String(m).padStart(2,"0");
+  calSel=`${curMonth}-01`;
+  render();
+}
+
+/* ================= 报告(原地展开 + 全量统计) ================= */
+function reportPage(){
+  const st=collectStats(reportRange.s,reportRange.e);
+  let tot={done:0,early:0,skip:0,overdue:0,todo:0,total:0};
+  Object.values(st.byPlan).forEach(v=>["done","early","skip","overdue","todo","total"].forEach(k=>tot[k]+=v[k]));
+  const totalTemp=Object.values(st.tempByPlan).reduce((a,b)=>a+b,0);
+  const score=Math.min(100,Math.round(pct(tot.done,tot.total)*0.65 + pct(tot.early,tot.done||1)*0.15 + 70*0.2));
+
+  /* 指标条形图:每个指标带 ⓘ,点击查看统计口径 */
+  const bar=(l,v,c)=>`<div class="bar-row"><div class="lbl">${l}
+      <span class="info-i" onclick="event.stopPropagation();metricInfo('${l}')">ⓘ</span></div>
+    <div class="track"><div class="fill" style="width:${v}%;background:${c}"></div></div>
+    <div class="val">${v}%</div></div>`;
+
+  let h=`<div class="nav"><h1>进展报告</h1></div><div class="page">`;
+
+  /* 时间段 */
+  h+=`<div class="card"><div class="card-title">统计时间段<span class="tip">选完日期自动重新统计</span></div>
+    <div class="inline2" style="margin-top:9px">
+      <input id="r-s" type="date" value="${reportRange.s}" onchange="applyRange()">
+      <input id="r-e" type="date" value="${reportRange.e}" onchange="applyRange()"></div>
+    <div class="quick">
+      <button onclick="quickRange(7)">近 7 天</button>
+      <button onclick="quickRange(30)">近 30 天</button>
+      <button onclick="quickRange(90)">近 90 天</button>
+    </div>
+    <div class="remark">${reportRange.s} ~ ${reportRange.e} · 应完成 <b>${tot.total}</b> 次 · 完成 <b>${tot.done}</b> · 跳过 ${tot.skip} · 未完成 ${tot.overdue} · 额外补记 ${totalTemp}</div>
+  </div>`;
+
+  /* 总分 */
+  h+=`<div class="card score">
+    <div class="score-num" style="background:conic-gradient(#34c759 0 ${score*3.6}deg,#eee ${score*3.6}deg 360deg)">
+      <b>${score}</b></div>
+    <div class="score-info"><b>综合得分 ${score} / 100</b>
+      <span>完成率 65% + 及时性 15% + 持续性 20%</span></div></div>`;
+
+  h+=`<div class="card">${bar("完成率",pct(tot.done,tot.total),"#34c759")}
+    ${bar("提前完成率",pct(tot.early,tot.done||1),"#30b0c7")}
+    ${bar("滞后完成率",pct(tot.done-tot.early,tot.done||1),"#ff9500")}
+    ${bar("跳过率",pct(tot.skip,tot.total),"#b8b8bd")}
+    ${bar("未完成率",pct(tot.overdue,tot.total),"#ff3b30")}
+    ${bar("待完成率",pct(tot.todo,tot.total),"#007aff")}
+  </div>`;
+
+  /* 计划维度:原地展开 */
+  h+=`<div class="card"><div class="card-title">计划维度<span class="tip">点计划行展开任务明细</span></div>`;
+  plans.forEach(p=>{
+    const ps=st.byPlan[p.id];
+    const o=ps||{done:0,early:0,skip:0,overdue:0,todo:0,total:0};
+    const opened=!!expanded[p.id];
+    h+=`<div class="prow" onclick="toggleExpand(${p.id})">
+      <span class="arrow ${opened?'down':''}">›</span>
+      <span class="pname" style="color:${p.color}">${p.icon} ${esc(p.name)}</span>
+      <span class="pstats">${pct(o.done,o.total)}%</span>
+      <span class="pmini">${o.done}/${o.total}</span>
+    </div>`;
+    if(opened){
+      h+=`<div class="pexpand">
+        <div class="psub">
+          <span>完成 ${o.done}</span><span>提前 ${o.early}</span><span>跳过 ${o.skip}</span>
+          <span>过期 ${o.overdue}</span><span>待完成 ${o.todo}</span>
+        </div>
+        <table class="rtable">
+          <tr><th>任务</th><th>应完成</th><th>完成</th><th>完成率</th><th>提前率</th><th>跳过</th><th>过期</th></tr>`;
+      /* 该计划下所有任务都要出现,包括区间内 0 次的 */
+      p.tasks.forEach(t=>{
+        const tk=p.id+"|"+t.id;
+        const ts=st.byTask[tk]||{done:0,early:0,skip:0,overdue:0,todo:0,total:0};
+        const flag = ts.total===0 ? `<span class="norec">区间内无排期</span>` : "";
+        h+=`<tr class="${ts.total===0?'zero':''}">
+          <td>${t.icon} ${esc(t.name)}${flag}</td>
+          <td>${ts.total}</td><td>${ts.done}</td>
+          <td><b>${pct(ts.done,ts.total)}%</b></td>
+          <td>${pct(ts.early,ts.done||1)}%</td>
+          <td>${ts.skip}</td>
+          <td class="${ts.overdue?'red':''}">${ts.overdue}</td></tr>`;
+      });
+      /* 临时任务单独一行 */
+      const tempRows=Object.values(st.byTask).filter(x=>x.planId===p.id&&x.temp);
+      tempRows.forEach(x=>{
+        h+=`<tr class="tempr"><td>✏️ ${esc(x.name)}<span class="tag">临时</span></td>
+          <td>—</td><td>${x.done}</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>`;
+      });
+      h+=`</table></div>`;
+    }
+  });
+  h+=`</div>`;
+
+  /* 建议 */
+  h+=`<div class="card"><div class="card-title">💡 分析建议</div><div class="advice">`;
+  let any=false;
+  plans.forEach(p=>{
+    const o=st.byPlan[p.id]; if(!o||!o.total) return;
+    const over=pct(o.overdue,o.total), skip=pct(o.skip,o.total), doneR=pct(o.done,o.total);
+    if(over>15){any=true;h+=`· 「${esc(p.name)}」过期 ${o.overdue} 次(未完成率 ${over}%):提醒时间或任务量需要调整<br>`;}
+    if(skip>20){any=true;h+=`· 「${esc(p.name)}」跳过率 ${skip}%:该任务节奏与实际不符,建议降低频率<br>`;}
+    if(doneR>=80&&o.total>3){any=true;h+=`· 「${esc(p.name)}」完成率 ${doneR}%,执行稳定,可考虑提升难度<br>`;}
+  });
+  if(totalTemp>0){any=true;h+=`· 有 ${totalTemp} 次额外补记:可把高频临时事项转为正式任务<br>`;}
+  if(!any) h+=`· 当前时段数据不足以给出建议`;
+  h+=`</div></div>`;
+  return h+`</div>`;
+}
+function toggleExpand(id){
+  expanded[id]=!expanded[id];
+  const y = window.__repY || window.scrollY || 0;
+  render();
+  /* 重绘后立刻恢复滚动位置,双 rAF 保证布局已完成 */
+  window.scrollTo(0, y);
+  requestAnimationFrame(()=>{ window.scrollTo(0, y); requestAnimationFrame(()=>window.scrollTo(0,y)); });
+}
+function quickRange(d){ reportRange={s:addDays(TODAY,-d+1),e:TODAY}; render(); }
+function applyRange(){
+  const s=$("#r-s").value,e=$("#r-e").value;
+  if(!s||!e) return toast("请选择日期");
+  if(s>e) return toast("开始不能晚于结束");
+  reportRange={s,e}; render(); toast("已重新统计");
+}
+
+/* ================= 提醒演示 ================= */
+function remindPage(){
+  const todayList=tasksOnDate(TODAY).filter(x=>!x.temp);
+  return `<div class="nav"><h1>🔔 提醒</h1></div><div class="page">
+    <div class="hintbox">真实 App 中是系统推送;这里用弹窗演示通知上的操作。</div>
+    ${todayList.map(x=>`<div class="card">
+      <div class="task" style="border:none">
+        <div class="dot" style="background:${x.color}"></div>
+        <div class="t-main"><div class="t-name">${x.icon} ${esc(x.name)}</div>
+          <div class="t-sub">${esc(x.plan.name)} · ${remindText(x.task)}</div></div>
+        <div class="st-tag" style="color:${x.status.c};background:${x.status.c}12">${x.status.t}</div>
+      </div>
+      <button class="primary" onclick="remindModal(${x.planId},${x.taskId})">模拟收到提醒</button>
+    </div>`).join("")}
+    <div class="card"><div class="card-title">提前完成间隔型循环任务</div>
+      <div class="remark" style="text-align:left">如「瑜伽」每隔 2 周:在应完成日期之前完成时,需让用户选择后续循环节奏。每天/工作日等连续型任务提前完成不涉及此问题,直接标记即可。</div>
+      <button class="primary" style="background:#ff9500"
+        onclick="askLoopChoice(2,21,plans.find(x=>x.id===2).tasks[0],'2025-10-10')">模拟提前完成「瑜伽」</button></div>
+  </div>`;
+}
+function remindModal(planId,taskId){
+  const p=plans.find(x=>x.id===planId);
+  const t=p.tasks.find(x=>x.id===taskId);
+  /* 普通到达提醒:只有三个动作;保持/重置循环只针对"提前完成间隔型任务"场景 */
+  overlay(`<div class="mask center" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+    <h3>🔔 提醒:${t.icon} ${esc(t.name)}</h3>
+    <p class="sheet-desc">计划「${esc(p.name)}」 · ${remindText(t)}</p>
+    <button class="primary green" onclick="closeOverlay();toast('✅ 已完成,本周期后续提醒取消')">✅ 已完成</button>
+    <button class="secondary" onclick="closeOverlay();toast('⏰ 1 小时后再次提醒')">⏰ 稍后提醒(1 小时)</button>
+    <button class="secondary" onclick="closeOverlay();toast('⏭ 已跳过,计入跳过率')">⏭ 跳过本次</button>
+  </div></div>`);
+}
+
+/* 指标统计口径说明 */
+const METRIC_DEFS={
+  "完成率":"已完成任务次数 ÷ 应完成任务次数。应完成次数按循环规则逐日推算(含区间内未来日期,状态为未开始/待完成也计入分母)。",
+  "提前完成率":"在应完成日期之前勾选完成的次数 ÷ 已完成总次数。例如今天提前完成明天的任务,计入分子。",
+  "滞后完成率":"超过应完成日期才完成的次数(含补卡)÷ 已完成总次数。",
+  "跳过率":"点击「跳过本次」的次数 ÷ 应完成总次数。跳过是主动放弃本周期,不计入未完成率;两者分母相同,便于对比。",
+  "未完成率":"已过期且始终未完成的次数 ÷ 应完成总次数。补卡完成后会从该指标中移出,计入滞后完成。",
+  "待完成率":"区间内尚未到期、也未提前完成的次数 ÷ 应完成总次数。区间包含未来日期时,该值代表剩余待执行部分。",
+  "额外任务占比":"临时补记的任务次数 ÷ 全部完成任务次数。临时任务不占正式计划的应完成额度,单独衡量计划外的自驱行为。"
+};
+function metricInfo(name){
+  overlay(`<div class="mask center" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+    <h3>📊 ${name} · 统计口径</h3>
+    <p style="font-size:13px;color:#444;line-height:1.8;text-align:left">${METRIC_DEFS[name]||"暂无说明"}</p>
+    <div class="remark">各指标在「计划维度」下钻表中同样适用,按计划/任务分别计算</div>
+    <button class="primary" onclick="closeOverlay()">我知道了</button>
+  </div></div>`);
+}
+
+/* ================= 弹窗基础 ================= */
+function overlay(html){ $("#overlay").innerHTML=html; }
+function closeOverlay(){ $("#overlay").innerHTML=""; }
+const ICONS=["📚","🏃","🎬","🧘","🔤","🎧","💪","🥗","✍️","💻","🎨","🎵","🧹","💰","🛏","☎️"];
+function pickIcon(box,el){ $$("#"+box+" span").forEach(s=>s.classList.remove("on")); el.classList.add("on"); }
+function pickedIcon(box){ const e=$("#"+box+" .on"); return e?e.textContent:"⭐"; }
+function showErr(id,msg){
+  const inp=$("#"+id); if(inp){inp.classList.add("err");try{inp.focus();}catch(e){}}
+  const box=$("#"+id+"-err"); if(box){box.textContent=msg;box.classList.add("show");}
+  toast(msg);
+}
+function clearErrs(){ $$(".err").forEach(e=>e.classList.remove("err")); $$(".err-msg").forEach(e=>e.classList.remove("show")); }
+
+/* ================= 计划表单(新建 + 编辑) ================= */
+function openPlanForm(planId,start,end){
+  clearErrs();
+  const isEdit=!!planId;
+  const p=isEdit?plans.find(x=>x.id===planId)
+    :{name:"",icon:"📚",start:start||TODAY,end:end||addDays(TODAY,90),color:"#af52de",depPlan:""};
+  const otherPlans=plans.filter(x=>!isEdit||x.id!==planId);
+  overlay(`<div class="mask" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+    <h3>${isEdit?"编辑计划":"新建计划"}</h3>
+    <div class="field"><label>计划名称</label>
+      <input id="pf-name" value="${esc(p.name)}" placeholder="例如:学英语" oninput="clearErrs()">
+      <div class="err-msg" id="pf-name-err"></div></div>
+    <div class="field"><label>计划图标</label>
+      <div class="icon-pick" id="pf-icons">
+        ${ICONS.map(c=>`<span class="${c===p.icon?'on':''}" onclick="pickIcon('pf-icons',this)">${c}</span>`).join("")}
+      </div></div>
+    <div class="field"><label>时间范围</label>
+      <div class="inline2"><input id="pf-start" type="date" value="${p.start}">
+        <input id="pf-end" type="date" value="${p.end}"></div>
+      <div class="quick" id="pf-quick">
+        <button onclick="quickPlan(this,30)">未来 1 个月</button>
+        <button onclick="quickPlan(this,90)">未来 3 个月</button>
+        <button onclick="quickPlan(this,365)">未来 1 年</button></div>
+      <div class="err-msg" id="pf-end-err"></div></div>
+
+    <div class="field"><label class="chkrow">
+      <input type="checkbox" id="pf-dep-on" ${p.depPlan?"checked":""}
+        onchange="$('#pf-dep-box').style.display=this.checked?'block':'none'">
+      <span>开启计划级依赖<br><small>本计划的开始时间排在被依赖计划结束之后</small></span></label>
+      <div id="pf-dep-box" style="display:${p.depPlan?"block":"none"};margin-top:8px">
+        <select id="pf-dep">
+          <option value="">请选择要依赖的计划</option>
+          ${otherPlans.map(x=>`<option value="${x.id}" ${String(p.depPlan)===String(x.id)?"selected":""}>${x.icon} ${esc(x.name)}</option>`).join("")}
+        </select>
+        <div class="remark" style="text-align:left">依赖会自动做环检测:若形成 A→B→A 的闭环会被拦截</div>
+      </div>
+    </div>
+    ${isEdit?`<div class="remark">修改时间范围后,超出新范围的任务会被同步收缩,并给出提示</div>`:""}
+    <button class="primary" onclick="savePlan(${isEdit?planId:0})">${isEdit?"保存修改":"创建计划"}</button>
+    ${isEdit?`<button class="danger" onclick="askDeletePlan(${planId})">🗑 删除计划</button>`:""}
+    <button class="secondary" onclick="closeOverlay()">取消</button>
+  </div></div>`);
+}
+function quickPlan(btn,days){
+  $$("#pf-quick button").forEach(b=>b.classList.remove("on")); btn.classList.add("on");
+  $("#pf-start").value=TODAY; $("#pf-end").value=addDays(TODAY,days);
+}
+function savePlan(planId){
+  clearErrs();
+  const name=$("#pf-name").value.trim();
+  if(!name) return showErr("pf-name","请填写计划名称");
+  const s=$("#pf-start").value,e=$("#pf-end").value;
+  if(!s||!e) return showErr("pf-end","请选择时间范围");
+  if(s>e) return showErr("pf-end","结束时间不能早于开始时间");
+  const depOn=$("#pf-dep-on").checked;
+  const depSel=$("#pf-dep");
+  if(depOn&&(!depSel||!depSel.value)) return toast("已开启依赖,请选择计划");
+
+  if(planId){
+    const p=plans.find(x=>x.id===planId);
+    /* 时间收缩时同步调整任务 */
+    let shrunk=[];
+    p.tasks.forEach(t=>{
+      if(t.start<s){ t.start=s; shrunk.push(t.name); }
+      if(t.end>e){ t.end=e; shrunk.push(t.name); }
+    });
+    Object.assign(p,{name,icon:pickedIcon("pf-icons"),start:s,end:e,depPlan:depOn?depSel.value:""});
+    closeOverlay();
+    toast(shrunk.length?`✅ 已保存,${[...new Set(shrunk)].length} 个任务时间已同步收缩`:"✅ 计划已更新");
+  }else{
+    const nid=Date.now();
+    plans.push({id:nid,name,icon:pickedIcon("pf-icons"),color:"#af52de",
+      start:s,end:e,depPlan:depOn?depSel.value:"",tasks:[]});
+    closeOverlay();
+    /* 没有任务的计划不会产生任何排期,引导用户顺手把任务加上 */
+    toast("✅ 计划已创建,再添加任务才会有排期");
+    setTimeout(()=>{ openTaskForm(nid); }, 700);
+  }
+  render();
+}
+function askDeletePlan(planId){
+  overlay(`<div class="mask center"><div class="sheet">
+    <h3>删除计划?</h3>
+    <p class="sheet-desc">该计划下 ${plans.find(x=>x.id===planId).tasks.length} 个任务及其所有提醒都会被取消</p>
+    <button class="primary danger-bg" onclick="doDeletePlan(${planId})">确认删除</button>
+    <button class="secondary" onclick="closeOverlay()">取消</button>
+  </div></div>`);
+}
+function doDeletePlan(planId){
+  plans=plans.filter(x=>x.id!==planId);
+  Object.keys(records).forEach(ds=>{
+    records[ds]=records[ds].filter(r=>r.planId!==planId);
+    if(!records[ds].length) delete records[ds];
+  });
+  openPlanId=null; closeOverlay(); toast("🗑 计划已删除"); render();
+}
+
+/* ================= 任务表单(新建 + 编辑) ================= */
+function taskFormHtml(pre,plan,task){
+  const isEdit=!!task;
+  const t=task||{name:"",icon:"🔤",start:plan.start,end:plan.end,rType:"loop",freq:"everyday",
+    freqX:"2",weekday:"",monthday:"",time:"08:00",dep:"",onceDate:TODAY};
+  const cands=plan.tasks.filter(x=>!isEdit||x.id!==task.id);
+  const needX=(t.freq==="everynday"||t.freq==="every2week");
+  return `
+  <div class="field"><label>任务名称</label>
+    <input id="${pre}-name" value="${esc(t.name)}" placeholder="例如:背单词" oninput="clearErrs()">
+    <div class="err-msg" id="${pre}-name-err"></div></div>
+
+  <div class="field"><label>任务图标</label>
+    <div class="icon-pick" id="${pre}-icons">
+      ${ICONS.slice(4).map(c=>`<span class="${c===t.icon?'on':''}" onclick="pickIcon('${pre}-icons',this)">${c}</span>`).join("")}
+    </div></div>
+
+  <div class="field"><label>时间范围(需在计划 ${plan.start} ~ ${plan.end} 内)</label>
+    <div class="inline2">
+      <input id="${pre}-start" type="date" value="${t.start}" min="${plan.start}" max="${plan.end}">
+      <input id="${pre}-end" type="date" value="${t.end}" min="${plan.start}" max="${plan.end}">
+    </div><div class="err-msg" id="${pre}-end-err"></div></div>
+
+  <div class="field"><label>提醒模式</label>
+    <select id="${pre}-rtype" data-pre="${pre}" onchange="onRType(this)">
+      <option value="loop" ${t.rType==="loop"?"selected":""}>循环提醒</option>
+      <option value="once" ${t.rType==="once"?"selected":""}>只提醒一次</option>
+    </select></div>
+
+  <div class="field" id="${pre}-loop" style="display:${t.rType==="loop"?"block":"none"}">
+    <label>循环频率</label>
+    <select id="${pre}-freq" data-pre="${pre}" onchange="onFreq(this)">
+      <option value="everyday" ${t.freq==="everyday"?"selected":""}>每天</option>
+      <option value="weekday" ${t.freq==="weekday"?"selected":""}>工作日每天</option>
+      <option value="weekend" ${t.freq==="weekend"?"selected":""}>周末每天</option>
+      <option value="weekly" ${t.freq==="weekly"?"selected":""}>每周(几)</option>
+      <option value="monthly" ${t.freq==="monthly"?"selected":""}>每月(几号)</option>
+      <option value="everynday" ${t.freq==="everynday"?"selected":""}>每隔 x 天</option>
+      <option value="every2week" ${t.freq==="every2week"?"selected":""}>每隔 x 周</option>
+    </select>
+
+    <div id="${pre}-weekly-box" style="display:${t.freq==="weekly"?"block":"none"};margin-top:8px">
+      <div class="wd-pick" id="${pre}-wd">
+        ${(()=>{
+          const sel=String(t.weekday||"").split(",").filter(x=>x!=="");
+          return WD.map((w,i)=>`<span class="${sel.includes(String(i))?'on':''}" data-v="${i}"
+            onclick="toggleMulti('${pre}-wd',this,'${pre}-wd-tip','wd')">${w.replace("周","")}</span>`).join("");
+        })()}
+      </div>
+      <div class="remark" id="${pre}-wd-tip" style="text-align:left;margin-top:5px"></div>
+    </div>
+
+    <div id="${pre}-monthly-box" style="display:${t.freq==="monthly"?"block":"none"};margin-top:8px">
+      <div class="md-pick" id="${pre}-md">
+        ${(()=>{
+          const sel=String(t.monthday||"").split(",").filter(x=>x!=="");
+          return Array.from({length:31},(_,i)=>i+1).map(n=>
+            `<span class="${sel.includes(String(n))?'on':''}" data-v="${n}"
+              onclick="toggleMulti('${pre}-md',this,'${pre}-md-tip','md')">${n}</span>`).join("");
+        })()}
+      </div>
+      <div class="remark" id="${pre}-md-tip" style="text-align:left;margin-top:5px"></div>
+      <div class="remark" style="text-align:left">选 29/30/31 号时,遇到没有该日的月份顺延到月末;可多选</div>
+    </div>
+
+    <div id="${pre}-xbox" style="display:${needX?"block":"none"};margin-top:8px">
+      <div class="inline2"><input id="${pre}-x" type="number" min="1" step="1" value="${t.freqX||2}" placeholder="x = ?">
+        <span style="flex:0 0 auto;align-self:center;font-size:13px;color:#8a8a90" id="${pre}-xunit">${t.freq==="every2week"?"周":"天"}</span></div>
+      <div class="err-msg" id="${pre}-x-err"></div>
+      <div class="remark" style="text-align:left;text-align:left">例如填 2,表示每 2 ${t.freq==="every2week"?"周":"天"}提醒一次</div>
+    </div>
+  </div>
+
+  <div class="field" id="${pre}-oncebox" style="display:${t.rType==="once"?"block":"none"}">
+    <label>提醒日期(仅一次)</label>
+    <input id="${pre}-once" type="date" value="${t.onceDate||TODAY}" min="${plan.start}" max="${plan.end}"></div>
+
+  <div class="field"><label>提醒时间</label>
+    <input id="${pre}-time" type="time" value="${t.time}"></div>
+
+  <div class="field"><label class="chkrow">
+    <input type="checkbox" id="${pre}-dep-on" ${t.dep?"checked":""}
+      onchange="$('#${pre}-depbox').style.display=this.checked?'block':'none'">
+    <span>依赖同计划下的其他任务<br><small>本任务开始时间排在被依赖任务结束之后</small></span></label>
+    <div id="${pre}-depbox" style="display:${t.dep?"block":"none"};margin-top:8px">
+      ${cands.length?`<select id="${pre}-dep">
+        <option value="">请选择要依赖的任务</option>
+        ${cands.map(x=>`<option value="${x.id}" ${String(t.dep)===String(x.id)?"selected":""}>${x.icon} ${esc(x.name)}</option>`).join("")}
+      </select>`:`<div class="remark" style="margin-top:0">该计划下暂无其他任务可依赖</div>`}
+    </div></div>`;
+}
+function onRType(sel){
+  const pre=sel.dataset.pre, loop=sel.value==="loop";
+  $("#"+pre+"-loop").style.display=loop?"block":"none";
+  $("#"+pre+"-oncebox").style.display=loop?"none":"block";
+}
+function onFreq(sel){
+  const pre=sel.dataset.pre, v=sel.value;
+  $("#"+pre+"-weekly-box").style.display  = v==="weekly"?"block":"none";
+  $("#"+pre+"-monthly-box").style.display = v==="monthly"?"block":"none";
+  const needX = (v==="everynday"||v==="every2week");
+  $("#"+pre+"-xbox").style.display = needX?"block":"none";
+  if(needX) $("#"+pre+"-xunit").textContent = v==="every2week"?"周":"天";
+}
+/* 多选提示文案:wd=周几用星期名,md=几号用数字 */
+function multiTipText(box,type){
+  const sel=$$("#"+box+" span.on").map(s=>Number(s.dataset.v)).sort((a,b)=>a-b);
+  if(!sel.length) return "尚未选择,请至少选择一项";
+  /* 周几用简称(周一/周三/周五),前面不再加"每周",避免出现"每周周一" */
+  if(type==="wd"){
+    const labels=sel.map(v=>WD[v]);
+    return `已选:${labels.join("、")}(${sel.length} 项)`;
+  }
+  return `已选:每月 ${sel.join("、")} 号(${sel.length} 项)`;
+}
+/* 多选切换:点击选中/取消,并刷新"已选"提示 */
+function toggleMulti(box,el,tipId,type){
+  el.classList.toggle("on");
+  const tip=document.getElementById(tipId);
+  if(tip) tip.textContent=multiTipText(box,type);
+}
+/* 初始化多选提示(打开弹窗时调用) */
+function initMultiTip(box,tipId,type){
+  const tip=document.getElementById(tipId);
+  if(tip) tip.textContent=multiTipText(box,type);
+}
+function openTaskForm(planId,taskId){
+  clearErrs();
+  const p=plans.find(x=>x.id===planId);
+  const t=taskId?p.tasks.find(x=>x.id===taskId):null;
+  overlay(`<div class="mask" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+    <h3>${t?"编辑任务":"在「"+esc(p.name)+"」下添加任务"}</h3>
+    ${taskFormHtml("tf",p,t)}
+    <button class="primary" onclick="saveTask(${planId},${taskId||0})">${t?"保存修改":"创建任务"}</button>
+    ${t?`<button class="danger" onclick="askDeleteTask(${planId},${taskId})">🗑 删除任务</button>`:""}
+    <button class="secondary" onclick="closeOverlay()">取消</button>
+  </div></div>`);
+  /* 初始化多选提示 */
+  initMultiTip("tf-wd","tf-wd-tip","wd");
+  initMultiTip("tf-md","tf-md-tip","md");
+}
+function readRemind(pre){
+  const rType=$("#"+pre+"-rtype").value;
+  const time=$("#"+pre+"-time").value;
+  if(!time) return {err:"请选择提醒时间"};
+  if(rType==="once"){
+    const d=$("#"+pre+"-once").value;
+    if(!d) return {err:"请选择提醒日期"};
+    return {rType,time,onceDate:d,freq:"",freqX:"",weekday:"",monthday:""};
+  }
+  const freq=$("#"+pre+"-freq").value;
+  const out={rType,time,freq,freqX:"",weekday:"",monthday:"",onceDate:""};
+  if(freq==="weekly"){
+    /* 多选:收集所有选中的周几 */
+    const sel=$$("#"+pre+"-wd span.on").map(s=>Number(s.dataset.v)).sort((a,b)=>a-b);
+    if(!sel.length) return {err:"每周(几)模式下,请至少选择一个星期几"};
+    out.weekday=sel.join(",");
+  }
+  if(freq==="monthly"){
+    /* 多选:收集所有选中的几号 */
+    const sel=$$("#"+pre+"-md span.on").map(s=>Number(s.dataset.v)).sort((a,b)=>a-b);
+    if(!sel.length) return {err:"每月(几号)模式下,请至少选择一个日期"};
+    out.monthday=sel.join(",");
+  }
+  if(freq==="everynday"||freq==="every2week"){
+    const raw=$("#"+pre+"-x").value.trim();
+    const n=Number(raw);
+    if(!raw||!Number.isFinite(n)||n<1) return {err:"请填写间隔 x(≥1 的整数)"};
+    out.freqX=String(Math.round(n));
+  }
+  return out;
+}
+function saveTask(planId,taskId){
+  clearErrs();
+  const p=plans.find(x=>x.id===planId);
+  const name=$("#tf-name").value.trim();
+  if(!name) return showErr("tf-name","请先填写任务名称");
+  const s=$("#tf-start").value,e=$("#tf-end").value;
+  if(!s||!e) return showErr("tf-end","请选择时间范围");
+  if(s>e) return showErr("tf-end","结束时间不能早于开始时间");
+  if(s<p.start||e>p.end) return showErr("tf-end","任务需在计划 "+p.start+" ~ "+p.end+" 内");
+  const r=readRemind("tf");
+  if(r.err) return showErr("tf-x",r.err);
+  const depOn=$("#tf-dep-on").checked, depSel=$("#tf-dep");
+  if(depOn&&(!depSel||!depSel.value)) return toast("已开启依赖,请选择任务");
+  const data={name,icon:pickedIcon("tf-icons"),start:s,end:e,...r,dep:depOn&&depSel?depSel.value:""};
+  if(taskId) Object.assign(p.tasks.find(x=>x.id===taskId),data);
+  else p.tasks.push({id:Date.now(),...data});
+  closeOverlay(); toast(taskId?"✅ 任务已更新":"✅ 任务已创建"); render();
+}
+function askDeleteTask(planId,taskId){
+  overlay(`<div class="mask center"><div class="sheet"><h3>删除任务?</h3>
+    <p class="sheet-desc">该任务提醒将取消,其他任务对它的依赖会解除</p>
+    <button class="primary danger-bg" onclick="doDeleteTask(${planId},${taskId})">确认删除</button>
+    <button class="secondary" onclick="closeOverlay()">取消</button></div></div>`);
+}
+function doDeleteTask(planId,taskId){
+  const p=plans.find(x=>x.id===planId);
+  p.tasks=p.tasks.filter(x=>x.id!==taskId);
+  p.tasks.forEach(t=>{ if(String(t.dep)===String(taskId)) t.dep=""; });
+  Object.keys(records).forEach(ds=>{
+    records[ds]=records[ds].filter(r=>!(r.planId===planId&&r.taskId===taskId));
+    if(!records[ds].length) delete records[ds];
+  });
+  closeOverlay(); toast("🗑 任务已删除"); render();
+}
+
+/* ================= 临时任务 ================= */
+function openTempForm(){
+  clearErrs();
+  overlay(`<div class="mask" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+    <h3>补记临时任务 · ${calSel}</h3>
+    <div class="field"><label>所属计划</label>
+      <select id="xf-plan">${plans.map(p=>`<option value="${p.id}">${p.icon} ${esc(p.name)}</option>`).join("")}</select></div>
+    <div class="field"><label>任务名称</label>
+      <input id="xf-name" placeholder="例如:跑步 30 分钟" oninput="clearErrs()">
+      <div class="err-msg" id="xf-name-err"></div></div>
+    <div class="remark">临时任务记为已完成,自动打"临时"标签,计入额外任务占比</div>
+    <button class="primary" onclick="saveTemp()">记录完成</button>
+    <button class="secondary" onclick="closeOverlay()">取消</button>
+  </div></div>`);
+}
+function saveTemp(){
+  clearErrs();
+  const name=$("#xf-name").value.trim();
+  if(!name) return showErr("xf-name","请填写任务名称");
+  const ds=calSel;
+  (records[ds]=records[ds]||[]).push({planId:Number($("#xf-plan").value),taskId:0,name,status:"temp",temp:true});
+  closeOverlay(); toast("✅ 已补记"); render();
+}
+
+/* ================= 我的页面:累计统计 + 勋章 + 年度计划 ================= */
+let meYear=Number(TODAY.slice(0,4));   /* 默认当前年 */
+
+function myStats(){
+  /* 遍历从最早计划开始到今天的每一天,统计累计数据(计划维度) */
+  let start=TODAY;
+  plans.forEach(p=>{ if(p.start<start) start=p.start; });
+  let done=0,early=0,temp=0,plansTouched=new Set(),days=0;
+  let ds=start;
+  while(ds<=TODAY){
+    let dayDone=0;
+    (records[ds]||[]).forEach(r=>{
+      if(r.status==="done"||r.status==="temp"){ done++; dayDone++; plansTouched.add(r.planId); if(r.early)early++; }
+      if(r.temp) temp++;
+    });
+    if(dayDone>0) days++;
+    ds=addDays(ds,1);
+  }
+  /* 连续打卡:从今天往回数(今天没打卡则从昨天起) */
+  let streak=0, cur=(records[TODAY]||[]).some(r=>r.status==="done"||r.status==="temp")?TODAY:addDays(TODAY,-1);
+  while((records[cur]||[]).some(r=>r.status==="done"||r.status==="temp")){
+    streak++; cur=addDays(cur,-1);
+  }
+  /* 计划维度:已收官计划数 + 年内连续有排期的月份数 */
+  const planDone=plans.filter(planFinished).length;
+  const months=yearOverview(TODAY.slice(0,4));
+  let monthStreak=0,run=0;
+  months.forEach(mo=>{ if(mo.items.length){run++; if(run>monthStreak)monthStreak=run;} else run=0; });
+  return {done,early,temp,streak,activeDays:days,plansTouched:plansTouched.size,
+          planCount:plans.length, joinDays:diffDays(start,TODAY)+1, planDone, monthStreak};
+}
+
+/* 计划是否已"完美收官":已结束且结束前所有排期都有完成/跳过记录 */
+function planFinished(p){
+  if(p.end>=TODAY) return false;
+  const full=p.tasks.every(t=>{
+    let ds=t.start;
+    const tEnd=t.end;
+    while(ds<=tEnd){
+      if(hitOn(t,ds)){
+        const rec=(records[ds]||[]).find(r=>r.taskId===t.id);
+        if(!rec||!("status" in rec)||(rec.status!=="done"&&rec.status!=="skip")) return false;
+      }
+      ds=addDays(ds,1);
+    }
+    return true;
+  });
+  return full;
+}
+
+function badgeDefs(st){
+  return [
+    /* 任务维度 */
+    {icon:"🌱",name:"第一步",desc:"完成第 1 次任务",got:st.done>=1,          prog:Math.min(st.done,1),max:1},
+    {icon:"🔥",name:"三连击",desc:"连续打卡 3 天",  got:st.streak>=3,        prog:Math.min(st.streak,3),max:3},
+    {icon:"⚡",name:"坚持一周",desc:"连续打卡 7 天", got:st.streak>=7,        prog:Math.min(st.streak,7),max:7},
+    {icon:"💯",name:"十全十美",desc:"累计完成 10 次",got:st.done>=10,        prog:Math.min(st.done,10),max:10},
+    {icon:"🏆",name:"五十连成",desc:"累计完成 50 次",got:st.done>=50,        prog:Math.min(st.done,50),max:50},
+    {icon:"🚀",name:"快人一步",desc:"提前完成 5 次", got:st.early>=5,        prog:Math.min(st.early,5),max:5},
+    {icon:"🎯",name:"多线并行",desc:"同时进行 2 个以上计划",got:st.planCount>=2,prog:Math.min(st.planCount,2),max:2},
+    /* 计划维度 */
+    {icon:"📚",name:"计划启程",desc:"制定第 1 个计划",got:st.planCount>=1,   prog:Math.min(st.planCount,1),max:1,grp:"计划"},
+    {icon:"🗂️",name:"计划收藏家",desc:"制定 3 个计划",got:st.planCount>=3,  prog:Math.min(st.planCount,3),max:3,grp:"计划"},
+    {icon:"🎉",name:"完美收官",desc:"完成 1 个计划(排期全部完成)",got:st.planDone>=1,prog:Math.min(st.planDone,1),max:1,grp:"计划"},
+    {icon:"📆",name:"连月坚持",desc:"连续 3 个月有计划排期",got:st.monthStreak>=3,prog:Math.min(st.monthStreak,3),max:3,grp:"计划"},
+    {icon:"🌈",name:"半年里程碑",desc:"连续 6 个月有计划排期",got:st.monthStreak>=6,prog:Math.min(st.monthStreak,6),max:6,grp:"计划"}
+  ];
+}
+let showAllBadges=false;
+function toggleBadges(){ showAllBadges=!showAllBadges; render(); }
+
+/* 某年 12 个月,每月包含哪些计划与排期次数 */
+function yearOverview(y){
+  const months=[];
+  for(let m=1;m<=12;m++){
+    const mStr=`${y}-${String(m).padStart(2,"0")}`;
+    const first=mStr+"-01";
+    const lastD=new Date(y,m,0).getDate();
+    const last=`${mStr}-${String(lastD).padStart(2,"0")}`;
+    const items=[];
+    plans.forEach(p=>{
+      /* 计划与该月有交集 */
+      if(p.end<first||p.start>last) return;
+      const from=p.start>first?p.start:first;
+      const to=p.end<last?p.end:last;
+      let hits=0;
+      p.tasks.forEach(t=>{
+        let ds=t.start>from?t.start:from;
+        const tEnd=t.end<to?t.end:to;
+        while(ds<=tEnd){ if(hitOn(t,ds)) hits++; ds=addDays(ds,1); }
+      });
+      if(hits>0) items.push({plan:p,hits});
+    });
+    months.push({m:mStr,items});
+  }
+  return months;
+}
+
+function myPage(){
+  const st=myStats();
+  let h=`<div class="nav"><h1>我的</h1></div><div class="page">`;
+
+  /* 头像卡 */
+  h+=`<div class="card me-head">
+    <div class="avatar">🌟</div>
+    <div class="me-info"><b>计划星球用户</b>
+      <span>加入 ${st.joinDays} 天 · ${st.planCount} 个计划进行中/已完成</span></div>
+  </div>`;
+
+  /* 累计统计(计划维度,不下钻) */
+  h+=`<div class="card"><div class="card-title">累计记录<span class="tip">计划维度汇总</span></div>
+    <div class="stat-grid">
+      <div class="stat"><b>${st.done}</b><span>累计完成</span></div>
+      <div class="stat"><b class="orange">${st.streak}</b><span>连续打卡(天)</span></div>
+      <div class="stat"><b class="cyan">${st.early}</b><span>提前完成</span></div>
+      <div class="stat"><b class="purple">${st.activeDays}</b><span>有记录的天数</span></div>
+    </div>
+    <div class="remark">临时补记 ${st.temp} 次,同样计入累计完成</div>
+  </div>`;
+
+  /* 勋章墙:默认展示前 8 枚,点"更多勋章"展开全部 */
+  const badges=badgeDefs(st);
+  const gotN=badges.filter(b=>b.got).length;
+  const shown=showAllBadges?badges:badges.slice(0,8);
+  h+=`<div class="card"><div class="card-title">勋章墙<span class="tip">${gotN} / ${badges.length} 已解锁</span></div>
+    <div class="badge-grid">`;
+  shown.forEach(b=>{
+    h+=`<div class="badge ${b.got?'on':''}" onclick="badgeInfo('${b.name}','${b.desc}',${b.got},${b.prog},${b.max})">
+      ${b.grp?`<span class="b-tag">${b.grp}</span>`:""}
+      <div class="b-ico">${b.icon}</div>
+      <div class="b-name">${b.name}</div>
+      <div class="b-bar"><i style="width:${Math.round(b.prog/b.max*100)}%"></i></div>
+      <div class="b-desc">${b.got?'已解锁':b.prog+' / '+b.max}</div>
+    </div>`;
+  });
+  if(badges.length>8){
+    h+=`<div class="badge-more" onclick="toggleBadges()">
+      ${showAllBadges?'收起 ⌃':`展开全部 ${badges.length} 枚 ⌄ <small>· 还有 ${badges.length-8} 枚未展示</small>`}
+    </div>`;
+  }
+  h+=`</div></div>`;
+
+  /* 年度计划总览:4 行 × 3 列月历格,点月份弹窗看全部计划 */
+  const months=yearOverview(meYear);
+  _yearMonths=months;
+  h+=`<div class="card"><div class="card-title">年度计划总览<span class="tip">月维度 · 每月有哪些计划</span></div>
+    <div class="year-nav">
+      <span class="gnav" onclick="meYear--;render()">‹</span>
+      <b>${meYear} 年</b>
+      <span class="gnav" onclick="meYear++;render()">›</span>
+    </div>
+    <div class="ygrid">`;
+  months.forEach(mo=>{
+    const curM=mo.m===TODAY.slice(0,7);
+    if(mo.items.length){
+      const prev=mo.items.slice(0,3);
+      h+=`<div class="ycell has ${curM?'cur':''}" onclick="monthDetail('${mo.m}')">
+        <div class="yc-head"><span class="yc-m">${Number(mo.m.slice(5))}月</span>
+          <span class="yc-n">${mo.items.reduce((a,b)=>a+b.hits,0)}次</span></div>
+        <div class="yc-body">
+        ${prev.map(i=>`<div class="yc-item"><span class="em">${i.plan.icon}</span>${esc(i.plan.name)}</div>`).join("")}
+        ${mo.items.length>3?`<div class="yc-more">+${mo.items.length-3} 个…</div>`:""}
+        </div>
+      </div>`;
+    }else{
+      h+=`<div class="ycell empty ${curM?'cur':''}">
+        <div class="yc-head"><span class="yc-m">${Number(mo.m.slice(5))}月</span></div>
+        <div class="yc-seal">空</div>
+        <div class="yc-add" onclick="event.stopPropagation();openPlanForm(null,'${mo.m}-01','${mo.m}-${new Date(meYear,Number(mo.m.slice(5)),0).getDate()}')">＋</div>
+      </div>`;
+    }
+  });
+  h+=`</div><div class="remark">每月最多预览 3 个计划,点月份弹窗查看全部排期明细</div></div>`;
+
+  return h+`</div>`;
+}
+let ymOpen=null;
+let _yearMonths=null;
+function monthDetail(m){
+  const mo=(_yearMonths||[]).find(x=>x.m===m);
+  if(!mo||!mo.items.length) return;
+  const y=m.slice(0,4);
+  let rows=mo.items.map(i=>`<div class="md-row">
+      <span class="dot" style="background:${i.plan.color}"></span>
+      <span class="md-name"><span class="em">${i.plan.icon}</span>${esc(i.plan.name)}</span>
+      <span class="md-hits">排期 ${i.hits} 次<br><small>${i.plan.start} ~ ${i.plan.end}</small></span>
+    </div>`).join("");
+  overlay(`<div class="mask center" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+    <h3>📅 ${y}年${Number(m.slice(5))}月</h3>
+    <p style="text-align:center;color:#8a8a90;font-size:12.5px;margin-bottom:10px">
+      共 ${mo.items.length} 个计划 · ${mo.items.reduce((a,b)=>a+b.hits,0)} 次排期</p>
+    <div class="md-list">${rows}</div>
+    <button class="primary" onclick="closeOverlay()">好的</button>
+  </div></div>`);
+}
+function badgeInfo(name,desc,got,prog,max){
+  overlay(`<div class="mask center" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+    <div style="text-align:center;font-size:44px;margin:4px 0 8px">${got?"🏅":"🔒"}</div>
+    <h3>${name}</h3>
+    <p style="text-align:center;color:#8a8a90;font-size:13px;margin-bottom:10px">${desc}</p>
+    <p style="text-align:center;font-size:14px">${got?"🎉 已解锁!继续保持":"进度:"+prog+" / "+max}</p>
+    <button class="primary" onclick="closeOverlay()">好的</button>
+  </div></div>`);
+}
+
+/* ================= 事件 ================= */
+$("#tabbar").addEventListener("click",e=>{
+  const tab=e.target.closest(".tab"); if(!tab) return;
+  view=tab.dataset.t;
+  if(view!=="plans") openPlanId=null;
+  render();
+});
+/* 记录报告滚动位置 */
+document.addEventListener("scroll",()=>{ if(view==="report") window.__repY=window.scrollY; },true);
+render();
+
+</script>
+
+<script>
+/* ============ PWA 增强:持久化 / 开屏提醒 / 日历导出 / 重置 ============ */
+(function(){
+  const KEY='planstar_data_v1';
+  const DEMO_TODAY='2025-10-10';   /* 示例数据锚定日期 */
+
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify({plans:plans, records:records})); }catch(e){}
+  }
+  function load(){
+    try{
+      const d=JSON.parse(localStorage.getItem(KEY));
+      if(d && Array.isArray(d.plans) && d.plans.length){ plans=d.plans; records=d.records||{}; return true; }
+    }catch(e){}
+    return false;
+  }
+  /* 示例数据整体平移到"今天"附近,保留演示观感 */
+  function shiftDemo(){
+    const d=diffDays(DEMO_TODAY, TODAY);
+    if(!d) return;
+    plans.forEach(p=>{
+      p.start=addDays(p.start,d); p.end=addDays(p.end,d);
+      p.tasks.forEach(t=>{
+        t.start=addDays(t.start,d); t.end=addDays(t.end,d);
+        if(t.onceDate) t.onceDate=addDays(t.onceDate,d);
+      });
+    });
+    const nk={};
+    Object.keys(records).forEach(k=>{ nk[addDays(k,d)]=records[k]; });
+    /* records 可能是 const 声明,原地替换内容 */
+    Object.keys(records).forEach(k=>{ delete records[k]; });
+    Object.keys(nk).forEach(k=>{ records[k]=nk[k]; });
+  }
+
+  /* render 后自动保存;myPage 增加导出/重置入口 */
+  const _render=render;
+  render=function(){ _render(); save(); };
+  const _myPage=myPage;
+  myPage=function(){
+    return _myPage()+
+      `<div class="card">
+        <div class="card-title">数据与日历</div>
+        <button class="primary" style="margin-top:10px" onclick="exportICS()">📅 导出到 iPhone 系统日历</button>
+        <div class="remark" style="text-align:center;margin-top:10px;cursor:pointer;color:#007aff"
+             onclick="resetAll()">↺ 清空数据,恢复示例</div>
+      </div>`;
+  };
+  window.resetAll=function(){
+    if(confirm("将清空你的全部计划与打卡记录,恢复示例数据。确定吗?")){
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      location.reload();
+    }
+  };
+
+  /* 导出到系统日历(.ics,浮动本地时间,iOS 日历直接识别) */
+  window.exportICS=function(){
+    const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//PlanStar//PWA//CN","CALSCALE:GREGORIAN","X-WR-CALNAME:计划星球"];
+    const dt=s=>s.replace(/-/g,"");
+    let n=0, ds=TODAY;
+    const end=addDays(TODAY,60);
+    while(ds<=end){
+      tasksOnDate(ds).forEach(x=>{
+        if(x.status.key==="done"||x.status.key==="skip") return;
+        const parts=(x.time||"08:00").split(":");
+        const hh=Number(parts[0])||0, mm=Number(parts[1])||0;
+        const pad=v=>String(v).padStart(2,"0");
+        const st=dt(ds)+"T"+pad(hh)+pad(mm)+"00";
+        const en=dt(ds)+"T"+pad(Math.min(hh+1,23))+pad(mm)+"00";
+        lines.push("BEGIN:VEVENT",
+          "UID:planstar-"+x.planId+"-"+x.taskId+"-"+dt(ds)+"@planstar.local",
+          "DTSTART:"+st, "DTEND:"+en,
+          "SUMMARY:"+(x.icon?x.icon+" ":"")+x.name,
+          "DESCRIPTION:"+x.plan.name+" · 来自计划星球",
+          "BEGIN:VALARM","TRIGGER:-PT10M","ACTION:DISPLAY",
+          "DESCRIPTION:计划提醒","END:VALARM","END:VEVENT");
+        n++;
+      });
+      ds=addDays(ds,1);
+    }
+    lines.push("END:VCALENDAR");
+    const blob=new Blob([lines.join("\r\n")],{type:"text/calendar;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="planstar.ics";
+    document.body.appendChild(a); a.click(); a.remove();
+    toast(n? "📅 已生成 "+n+" 条日程,请在弹出的下载中打开并导入日历"
+           : "未来 60 天没有待完成日程");
+  };
+
+  /* 开屏补提醒:列出今天未完成的任务 */
+  window.openTodayRemind=function(){
+    const pend=tasksOnDate(TODAY).filter(x=>
+      x.status.key==="todo"||x.status.key==="overdue"||x.status.key==="later");
+    if(!pend.length) return;
+    overlay(`<div class="mask center" onclick="if(event.target===this)closeOverlay()"><div class="sheet">
+      <h3>🔔 今日待办 ${pend.length} 项</h3>
+      <div style="margin:8px 0 12px">
+      ${pend.map(x=>`<div class="md-row">
+        <span class="dot" style="background:${x.color}"></span>
+        <span class="md-name">${x.icon} ${esc(x.name)}</span>
+        <span class="md-hits">${x.time}</span></div>`).join("")}
+      </div>
+      <button class="primary" onclick="closeOverlay()">知道了</button>
+      <button class="secondary" onclick="closeOverlay();exportICS()">📅 导出到系统日历</button>
+    </div></div>`);
+  };
+
+  /* 启动流程:恢复数据 → 平移示例 → 重绘 → 开屏提醒 */
+  const had=load();
+  if(!had) shiftDemo();
+  render();
+  setTimeout(openTodayRemind, 600);
+
+  /* Service Worker:https 环境才注册(本地 file:// 调试自动跳过) */
+  if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
